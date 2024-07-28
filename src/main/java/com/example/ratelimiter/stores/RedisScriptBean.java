@@ -14,6 +14,10 @@ import org.springframework.data.redis.core.script.RedisScript;
 @Configuration
 public class RedisScriptBean {
 
+    /**
+     * LUA Script for implemneting sliding window algorithm.
+     * @return
+     */
     @Bean
     public RedisScript<Boolean> redisScript() {
         String script = """

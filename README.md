@@ -30,3 +30,7 @@ TODO - Change the tests to use a in-memory store or move the tests to integratio
 java -jar build/libs/ratelimiter-x.y.z.jar
 ```
 Alternatively directly run the webapp using hava command line.
+
+# TODO
+1. Enable SSL for APIs as well as for redis client.
+2. Enable OpenAPI specification generation.

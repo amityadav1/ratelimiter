@@ -10,7 +10,9 @@ import com.example.ratelimiter.model.RateLimiterConfig;
 public interface RateLimiterStore {
     /**
      * @param key - Key or token for limiting
-     * @param config - Rate Limiter Configuration
+     * @param config - Rate Limiter Configuration. This provides the flexibility of
+     *               specifying different configuration for different context if needed
+     *               or allows for dynamically changing the configuration for a given context.
      * @return - True if the rate limited based on 
      * the provided configuration, false otherwise
      */
