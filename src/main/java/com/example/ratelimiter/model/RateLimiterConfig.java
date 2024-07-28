@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 
 /**
  * Define the configuration class for the Rate Limiting service.
- * The annotations @configuration and @configurationproperties
+ * The annotations @configuration and @Configurationproperties
  * enables 
  */
 @Configuration
