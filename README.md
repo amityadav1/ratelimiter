@@ -31,6 +31,14 @@ java -jar build/libs/ratelimiter-x.y.z.jar
 ```
 Alternatively directly run the webapp using hava command line.
 
+# Metrics
+Uses Graphite as the backend for metrics collection. Use dockers for running a local graphite server (default configuration)
+```bash
+docker pull graphiteapp/graphite-statsd
+docker run -d --name graphite-server -p 80:80 -p 2003-2004:2003-2004 -p 2023-2024:2023-2024 -p 8125:8125/udp -p 8126:8126 graphiteapp/graphite-statsd
+```
+
 # TODO
 1. Enable SSL for APIs as well as for redis client.
 2. Enable OpenAPI specification generation.
+3. Enable spring boot out of the box metrics export to Graphite.
