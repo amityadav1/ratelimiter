@@ -1,6 +1,7 @@
 package com.example.ratelimiter.stores;
 
 import com.example.ratelimiter.model.RateLimiterConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.RedisScript;
@@ -14,12 +15,13 @@ import java.util.Collections;
  */
 @Configuration
 @Component
+@Slf4j
 public class RedisRateLimiterStore implements RateLimiterStore {
 
     private final RedisTemplate<String, String> redisTemplate;
-    private final RedisScript<Boolean> redisScript;
+    private final RedisScript<String> redisScript;
 
-    public RedisRateLimiterStore(RedisTemplate<String, String> redisTemplate, RedisScript<Boolean> redisScript) {
+    public RedisRateLimiterStore(RedisTemplate<String, String> redisTemplate, RedisScript<String> redisScript) {
         this.redisTemplate = redisTemplate;
         this.redisScript = redisScript;
     }
@@ -40,11 +42,19 @@ public class RedisRateLimiterStore implements RateLimiterStore {
      * @return TRUE if the request is rate limited, FALSE otherwise.
      */
     @Override
-    public boolean isRateLimited(String key, RateLimiterConfig config) {
-        return redisTemplate.execute(redisScript,
-                Collections.singletonList(key),
-                String.valueOf(config.getLimit()),
-                String.valueOf(config.getInterval()));
+    public Integer isRateLimited(String key, RateLimiterConfig config) {
+        String result = redisTemplate.execute(redisScript,
+                            Collections.singletonList(key),
+                            String.valueOf(config.getLimit()),
+                            String.valueOf(config.getInterval()));
+        log.info("Received {} for {}", result, key);
+        Integer retryAfter = 0;
+        try {
+            retryAfter = Integer.valueOf(result);
+        } catch (NumberFormatException e) {
+            log.info("Number format exception {}", e.getMessage());
+        }
+        // We fail open if the call to redis does not succeed.
+        return retryAfter;
     }
-
 }

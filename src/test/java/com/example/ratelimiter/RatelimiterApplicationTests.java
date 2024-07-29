@@ -1,5 +1,6 @@
 package com.example.ratelimiter;
 
+import static com.example.ratelimiter.controller.RateLimiterController.RETRY_AFTER_HEADER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -110,30 +111,28 @@ class RatelimiterApplicationTests {
 		int interval = getResponse.getBody().getInterval();
 
 		String checkLimitURL = "http://localhost:" + port + "/api/is_rate_limited/";
-		ResponseEntity<Boolean> response;
+		ResponseEntity<Void> response;
 
 		// Let's note the current time in seconds;
 		long startTime = System.currentTimeMillis()/1000;
 
 		// Test that request within the limit within the interval are allowed.
 		for (int i = 0 ; i < limit; i++) {
-			response = this.restTemplate.getForEntity(checkLimitURL + "abcd", Boolean.class);
+			response = this.restTemplate.getForEntity(checkLimitURL + "abcd", Void.class);
 			assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
-			assertEquals(response.getBody(), Boolean.FALSE);
 		}
 
 		// Test once the limit is reached, rate limiting kicks in.
 		for (int i = 0 ; i < limit; i++) {
-			response = this.restTemplate.getForEntity(checkLimitURL + "abcd", Boolean.class);
-			assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
-			assertEquals(response.getBody(), Boolean.TRUE);
+			response = this.restTemplate.getForEntity(checkLimitURL + "abcd", Void.class);
+			assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(429));
+			assert(response.getHeaders().containsKey(RETRY_AFTER_HEADER));
 		}
 
 		// Test any other key still are allowed - so rate limiting is per key.
 		for (int i = 0 ; i < limit/2; i++) {
-			response = this.restTemplate.getForEntity(checkLimitURL + "def", Boolean.class);
+			response = this.restTemplate.getForEntity(checkLimitURL + "def", Void.class);
 			assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
-			assertEquals(response.getBody(), Boolean.FALSE);
 		}
 
 		// Wait until the interval has elapsed.
@@ -147,13 +146,11 @@ class RatelimiterApplicationTests {
 		}
 
 		// Ensure requests are allowed again.
-		response = this.restTemplate.getForEntity(checkLimitURL + "abcd", Boolean.class);
+		response = this.restTemplate.getForEntity(checkLimitURL + "abcd", Void.class);
 		assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
-		assertEquals(response.getBody(), Boolean.FALSE);
 
-		response = this.restTemplate.getForEntity(checkLimitURL + "def", Boolean.class);
+		response = this.restTemplate.getForEntity(checkLimitURL + "def", Void.class);
 		assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
-		assertEquals(response.getBody(), Boolean.FALSE);
 	}
 
 
@@ -174,16 +171,15 @@ class RatelimiterApplicationTests {
 		int interval = getResponse.getBody().getInterval();
 
 		String checkLimitURL = "http://localhost:" + port + "/api/is_rate_limited/";
-		ResponseEntity<Boolean> response;
+		ResponseEntity<Void> response;
 
 		// Lets note the current time in seconds;
 		long startTime = System.currentTimeMillis()/1000;
 
 		// Send all the requests which are allowed (i.e upto 'limit' number of requests).
 		for (int i = 0 ; i < limit; i++) {
-			response = this.restTemplate.getForEntity(checkLimitURL + "xyz", Boolean.class);
+			response = this.restTemplate.getForEntity(checkLimitURL + "xyz", Void.class);
 			assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
-			assertEquals(response.getBody(), Boolean.FALSE);
 		}
 
 		// Change Config and increase the limit (Doubling the limits).
@@ -195,16 +191,14 @@ class RatelimiterApplicationTests {
 
 		// We can send additional `limit` number of requests now and they should be allowed
 		for (int i = 0 ; i < limit; i++) {
-			response = this.restTemplate.getForEntity(checkLimitURL + "xyz", Boolean.class);
+			response = this.restTemplate.getForEntity(checkLimitURL + "xyz", Void.class);
 			assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
-			assertEquals(response.getBody(), Boolean.FALSE);
 		}
 
 		// We have reached the new configured limits, so rate limiting should kick in.
-		response = this.restTemplate.getForEntity(checkLimitURL + "xyz", Boolean.class);
-		assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
-		assertEquals(response.getBody(), Boolean.TRUE);
-
+		response = this.restTemplate.getForEntity(checkLimitURL + "xyz", Void.class);
+		assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(429));
+		assert(response.getHeaders().containsKey(RETRY_AFTER_HEADER));
 
 		try {
 			long endTime = System.currentTimeMillis()/1000;
@@ -216,10 +210,7 @@ class RatelimiterApplicationTests {
 		}
 
 		// After the interval has passed , requests should be allowed
-		response = this.restTemplate.getForEntity(checkLimitURL + "xyz", Boolean.class);
+		response = this.restTemplate.getForEntity(checkLimitURL + "xyz", Void.class);
 		assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(200));
-		assertEquals(response.getBody(), Boolean.FALSE);
 	}
-
-
 }

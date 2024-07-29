@@ -45,7 +45,7 @@ public class RateLimiterService {
                 "interval {} seconds)", limit, interval);
     }
 
-    public boolean isRateLimited(String uniqueToken) {
+    public Integer isRateLimited(String uniqueToken) {
         return store.isRateLimited(uniqueToken, this.config.get());
     }
 

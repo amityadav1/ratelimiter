@@ -19,7 +19,7 @@ public class RedisScriptBean {
      * @return
      */
     @Bean
-    public RedisScript<Boolean> redisScript() {
+    public RedisScript<String> redisScript() {
         String script = """
                 -- Get the current time
                 local current_time = redis.call('TIME')
@@ -43,11 +43,18 @@ public class RedisScriptBean {
                     
                     -- Set Expiry
                     redis.call('EXPIRE', key, limit)
-                    return false
+                    return tostring(0) -- Not being rate limited
                 end
                 
-                return true
+                -- Get the oldest entry in the set
+                 local oldest_ts = redis.call('ZRANGE', key, 0, 0, 'WITHSCORES')[2]
+                    if oldest_ts then
+                        local retry_after = math.ceil((oldest_ts + interval * 1000 - current_time[1]) / 1000)
+                        return retry_after > 0 and tostring(retry_after) or tostring(1)  -- Ensure we always return at least 1 second
+                    else
+                        return tostring(interval)  -- If for some reason oldest_ts is nil, return the full interval
+                    end
                 """;
-        return RedisScript.of(script, Boolean.class);
+        return RedisScript.of(script, String.class);
     }
 }

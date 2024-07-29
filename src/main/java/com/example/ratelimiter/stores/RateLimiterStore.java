@@ -13,8 +13,7 @@ public interface RateLimiterStore {
      * @param config - Rate Limiter Configuration. This provides the flexibility of
      *               specifying different configuration for different context if needed
      *               or allows for dynamically changing the configuration for a given context.
-     * @return - True if the rate limited based on 
-     * the provided configuration, false otherwise
+     * @return - 0 if not rate limited, else number of seconds to wait before retrying.
      */
-    public boolean isRateLimited(String key, RateLimiterConfig config);
+    public Integer isRateLimited(String key, RateLimiterConfig config);
 }

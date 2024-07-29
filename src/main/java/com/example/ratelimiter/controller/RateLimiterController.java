@@ -3,6 +3,8 @@ package com.example.ratelimiter.controller;
 import com.example.ratelimiter.model.RateLimiterConfig;
 import com.example.ratelimiter.service.RateLimiterService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Slf4j
 public class RateLimiterController {
 
+    public static final String RETRY_AFTER_HEADER = "Retry-After";
     private final RateLimiterService rateLimiterService;
 
     public RateLimiterController(RateLimiterService rateLimitService) {
@@ -34,12 +37,15 @@ public class RateLimiterController {
     }
 
     @GetMapping("/is_rate_limited/{uniqueToken}")
-    public ResponseEntity<Boolean> isRateLimited(@PathVariable String uniqueToken) {
+    public ResponseEntity<Void> isRateLimited(@PathVariable String uniqueToken) {
         log.debug(String.format("Received Check Rate Limit request for %s", uniqueToken));
-        boolean isLimited = rateLimiterService.isRateLimited(uniqueToken);
-        if (isLimited) {
+        Integer isLimited = rateLimiterService.isRateLimited(uniqueToken);
+        if (isLimited > 0) {
             log.info("Rate Limiting applied for {}", uniqueToken);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(RETRY_AFTER_HEADER, isLimited.toString());
+            return new ResponseEntity<>(headers, HttpStatusCode.valueOf(429));
         }
-        return ResponseEntity.ok(isLimited ? Boolean.TRUE : Boolean.FALSE);
+        return new ResponseEntity<>(HttpStatusCode.valueOf(200));
     }
 }
