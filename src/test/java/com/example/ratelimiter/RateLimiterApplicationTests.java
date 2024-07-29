@@ -24,7 +24,7 @@ import com.example.ratelimiter.model.RateLimiterConfig;
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ContextConfiguration
 @TestPropertySource("/test.properties")
-class RatelimiterApplicationTests {
+class RateLimiterApplicationTests {
 
 	@LocalServerPort
 	private int port;
@@ -36,11 +36,11 @@ class RatelimiterApplicationTests {
 	private TestRestTemplate restTemplate;
 
 	// Initial configuration from the properties file for limit.
-	@Value("${"+RatelimiterApplication.RATE_LIMITER_CONFIG_LIMIT+"}")
+	@Value("${"+ RateLimiterApplication.RATE_LIMITER_CONFIG_LIMIT+"}")
 	private int initLimit;
 
 	// Initial configuration from the properties file for interval.
-	@Value("${" + RatelimiterApplication.RATE_LIMITER_CONFIG_INTERVAL + "}")
+	@Value("${" + RateLimiterApplication.RATE_LIMITER_CONFIG_INTERVAL + "}")
 	private int initInterval;
 
 	/*
@@ -127,6 +127,9 @@ class RatelimiterApplicationTests {
 			response = this.restTemplate.getForEntity(checkLimitURL + "abcd", Void.class);
 			assertEquals(response.getStatusCode(), HttpStatusCode.valueOf(429));
 			assert(response.getHeaders().containsKey(RETRY_AFTER_HEADER));
+			int retryAfter = Integer.valueOf(response.getHeaders().get(RETRY_AFTER_HEADER).get(0));
+			assert(retryAfter <= interval);
+
 		}
 
 		// Test any other key still are allowed - so rate limiting is per key.

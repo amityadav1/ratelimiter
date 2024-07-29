@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class RatelimiterApplication {
+public class RateLimiterApplication {
 
 	// static public constants for rate limiter configuration
 	public final static String RATE_LIMITER_CONFIG_PREFIX = "rate.limit";
@@ -12,7 +12,7 @@ public class RatelimiterApplication {
 	public final static String RATE_LIMITER_CONFIG_LIMIT =  RATE_LIMITER_CONFIG_PREFIX +  ".limit";
 
 	public static void main(String[] args) {
-		SpringApplication.run(RatelimiterApplication.class, args);
+		SpringApplication.run(RateLimiterApplication.class, args);
 	}
 
 }

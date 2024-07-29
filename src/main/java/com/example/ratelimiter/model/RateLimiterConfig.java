@@ -1,8 +1,8 @@
 package com.example.ratelimiter.model;
 
+import com.example.ratelimiter.RateLimiterApplication;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import com.example.ratelimiter.RatelimiterApplication;
 
 
 import lombok.AllArgsConstructor;
@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
  * enables 
  */
 @Configuration
-@ConfigurationProperties(prefix = RatelimiterApplication.RATE_LIMITER_CONFIG_PREFIX)
+@ConfigurationProperties(prefix = RateLimiterApplication.RATE_LIMITER_CONFIG_PREFIX)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

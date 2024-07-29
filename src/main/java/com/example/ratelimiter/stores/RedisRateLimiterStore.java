@@ -1,6 +1,9 @@
 package com.example.ratelimiter.stores;
 
+import com.codahale.metrics.MetricRegistry;
 import com.example.ratelimiter.model.RateLimiterConfig;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,9 +24,13 @@ public class RedisRateLimiterStore implements RateLimiterStore {
     private final RedisTemplate<String, String> redisTemplate;
     private final RedisScript<String> redisScript;
 
-    public RedisRateLimiterStore(RedisTemplate<String, String> redisTemplate, RedisScript<String> redisScript) {
+    private final Counter counter;
+
+
+    public RedisRateLimiterStore(RedisTemplate<String, String> redisTemplate, RedisScript<String> redisScript, MeterRegistry meterRegistry) {
         this.redisTemplate = redisTemplate;
         this.redisScript = redisScript;
+        counter = Counter.builder("redis_errors").register(meterRegistry);
     }
 
     /**
@@ -43,16 +50,22 @@ public class RedisRateLimiterStore implements RateLimiterStore {
      */
     @Override
     public Integer isRateLimited(String key, RateLimiterConfig config) {
-        String result = redisTemplate.execute(redisScript,
-                            Collections.singletonList(key),
-                            String.valueOf(config.getLimit()),
-                            String.valueOf(config.getInterval()));
-        log.info("Received {} for {}", result, key);
         Integer retryAfter = 0;
         try {
+            String result = redisTemplate.execute(redisScript,
+                    Collections.singletonList(key),
+                    String.valueOf(config.getLimit()),
+                    String.valueOf(config.getInterval()));
+            log.debug("Received {} for {}", result, key);
             retryAfter = Integer.valueOf(result);
         } catch (NumberFormatException e) {
+            // Increase the Redis error counter
+            counter.increment();
             log.info("Number format exception {}", e.getMessage());
+        } catch (Exception e) {
+            // Increase the Redis error counter
+            counter.increment();
+            log.info("Exception calling redis store {}", e.getMessage());
         }
         // We fail open if the call to redis does not succeed.
         return retryAfter;
