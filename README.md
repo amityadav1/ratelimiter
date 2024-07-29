@@ -12,18 +12,20 @@ limiter to specify rate limiting interval (in seconds) and limit (number of call
 2. POST /api/config -> Updates the current rate limiter [configuration]((src/main/java/com/example/ratelimiter/model/RateLimiterConfig.java)).
 3. GET /api/is_rate_limited/:uniquetoken --> Return if this token is rate limited.  
 
+Checkout http://localhost:8080/swagger-ui/index.html after running the service for api docs.
+
 # Build
 ```Gradle 
 ./gradlew build
 ```
-Note - This needs a local redis running in order to run tests. 
+Note - This needs a **local redis** running in order to run tests. 
 TODO - Change the tests to use a in-memory store or move the tests to integration testing.
 # Run
 ```Gradle
 ./gradlew bootRun
 ```
 Build and run the rate limiter web application.
-Note - This needs a local redis running in order to run tests.
+Note - This needs a **local redis** running in order to run tests.
 TODO - Change the tests to use a in-memory store or move the tests to integration testing.
 
 ```bash
@@ -40,5 +42,5 @@ docker run -d --name graphite-server -p 80:80 -p 2003-2004:2003-2004 -p 2023-202
 
 # TODO
 1. Enable SSL for APIs as well as for redis client.
-2. Enable OpenAPI specification generation.
-3. Enable spring boot out of the box metrics export to Graphite.
+2. Enable spring boot out of the box metrics export to Graphite.
+3. Enable Integration testing by launching the redis server from within the test suite.
