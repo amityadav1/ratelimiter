@@ -18,15 +18,16 @@ Checkout http://localhost:8080/swagger-ui/index.html after running the service f
 ```Gradle 
 ./gradlew build
 ```
-Note - This needs a **local redis** running in order to run tests. 
-TODO - Change the tests to use a in-memory store or move the tests to integration testing.
+Note - This needs a **local redis** running in order to run tests. [Here](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-mac-os/) are
+the installation instructions for redis on macOS.
+
 # Run
 ```Gradle
 ./gradlew bootRun
 ```
 Build and run the rate limiter web application.
-Note - This needs a **local redis** running in order to run tests.
-TODO - Change the tests to use a in-memory store or move the tests to integration testing.
+Note - This needs a **local redis** running in order to run tests.  [Here](https://redis.io/docs/latest/operate/oss_and_stack/install/install-redis/install-redis-on-mac-os/) are 
+the installation instructions for redis on macOS.
 
 ```bash
 java -jar build/libs/ratelimiter-x.y.z.jar
@@ -44,3 +45,4 @@ docker run -d --name graphite-server -p 80:80 -p 2003-2004:2003-2004 -p 2023-202
 1. Enable SSL for APIs as well as for redis client.
 2. Enable spring boot out of the box metrics export to Graphite.
 3. Enable Integration testing by launching the redis server from within the test suite.
+4. And many more....
