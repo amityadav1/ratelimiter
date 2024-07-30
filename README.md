@@ -10,7 +10,7 @@ limiter to specify rate limiting interval (in seconds) and limit (number of call
 ## API
 1. GET /api/config --> returns the current rate limiter [configuration]((src/main/java/com/example/ratelimiter/model/RateLimiterConfig.java)).
 2. POST /api/config -> Updates the current rate limiter [configuration]((src/main/java/com/example/ratelimiter/model/RateLimiterConfig.java)).
-3. GET /api/is_rate_limited/:uniquetoken --> Return if this token is rate limited.  
+3. GET /api/is_rate_limited/:uniquetoken --> Returns 429 and Retry-After header if this token is rate limited.  Return 200 otherwise.
 
 Checkout http://localhost:8080/swagger-ui/index.html after running the service for api docs.
 
